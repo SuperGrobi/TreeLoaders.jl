@@ -4,6 +4,7 @@ function in_bbox(lon, lat, bbox)
     return lon_in && lat_in
 end
 
+
 function load_nottingham_trees(path; bbox=nothing)
     df = CSV.read(path, DataFrame)
 
