@@ -14,6 +14,7 @@ function load_nottingham_trees(path; bbox=nothing)
     )
     rename!(df, name_map)
     filter!(:FELLED=>==("No"), df)
+    filter!([:CROWN_SPREAD_RADIUS, :HEIGHT_N]=>(csr, h)->!ismissing(csr) && !ismissing(h), df)
 
     relevant_names = [:id, :TREETYPE, :SPECIES, :COMMONNAME, :HEIGHT, :SPREAD, :CROWN_SPREAD, :CROWN_SPREAD_RADIUS, :HEIGHT_N, :lon, :lat]
     
