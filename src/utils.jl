@@ -11,3 +11,9 @@ function bounding_box(lon, lat)
     end
     return (minlat=min_lat, minlon=min_lon, maxlat=max_lat, maxlon=max_lon)
 end
+
+function in_bbox(lon, lat, bbox)
+    lon_in = bbox.minlon <= lon <= bbox.maxlon
+    lat_in = bbox.minlat <= lat <= bbox.maxlat
+    return lon_in && lat_in
+end
