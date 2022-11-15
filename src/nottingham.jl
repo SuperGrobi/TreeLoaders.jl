@@ -21,6 +21,7 @@ function load_nottingham_trees(path; bbox=nothing)
         metadata!(df, "center_lat", (bbox.minlat + bbox.maxlat)/2; style=:note)
         df = df[:, relevant_names]
     else
+        bbox = BoundingBox(bbox)  # sort arguments
         metadata!(df, "center_lon", (bbox.minlon + bbox.maxlon)/2; style=:note)
         metadata!(df, "center_lat", (bbox.minlat + bbox.maxlat)/2; style=:note)
         df = filter([:lon, :lat]=>(lon, lat)->in_BoundingBox(lon, lat, bbox), df[:, relevant_names])
