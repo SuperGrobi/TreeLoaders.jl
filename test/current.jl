@@ -6,7 +6,7 @@ using SpatialIndexing
 
 path = "Desktop/Masterarbeit/data/Nottingham/trees/trees_full_rest.csv"
 
-trees = load_nottingham_trees(joinpath(homedir(), path); bbox=(minlat=52.89, minlon=-1.2, maxlat=52.92, maxlon=-1.165));
+trees = load_nottingham_trees(joinpath(homedir(), path); bbox=(minlon=-1.2, minlat=52.89, maxlon=-1.165, maxlat=52.92));
 
 TreeLoaders.project_local!(trees.pointgeom, metadata(trees, "center_lon"), metadata(trees, "center_lat"))
 
@@ -16,7 +16,7 @@ fr.id = 0
 fr
 trees_full
 trees_reduced
-scatter(trees.pointgeom, ms=5rand(length(trees.pointgeom))', ratio=1, dpi=300, xlims=(-100, 100), ylims=(-100,100))
+scatter(trees.pointgeom, ms=5rand(length(trees.pointgeom))', ratio=1)
 
 
 rt = RTree{Float64, 2}(Int, String)

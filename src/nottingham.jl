@@ -16,14 +16,14 @@ function load_nottingham_trees(path; bbox=nothing)
     
     # trim dataframe to needed size and set metadata
     if bbox === nothing
-        bbox = bounding_box(df.lon, df.lat)
+        bbox = BoundingBox(df.lon, df.lat)
         metadata!(df, "center_lon", (bbox.minlon + bbox.maxlon)/2; style=:note)
         metadata!(df, "center_lat", (bbox.minlat + bbox.maxlat)/2; style=:note)
         df = df[:, relevant_names]
     else
         metadata!(df, "center_lon", (bbox.minlon + bbox.maxlon)/2; style=:note)
         metadata!(df, "center_lat", (bbox.minlat + bbox.maxlat)/2; style=:note)
-        df = filter([:lon, :lat]=>(lon, lat)->in_bbox(lon, lat, bbox), df[:, relevant_names])
+        df = filter([:lon, :lat]=>(lon, lat)->in_BoundingBox(lon, lat, bbox), df[:, relevant_names])
     end
     
     # add ArchGDAL points
