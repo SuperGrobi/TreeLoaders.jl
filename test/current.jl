@@ -8,6 +8,8 @@ path = "Desktop/Masterarbeit/data/Nottingham/trees/trees_full_rest.csv"
 
 trees = load_nottingham_trees(joinpath(homedir(), path); bbox=(minlon=-1.2, minlat=52.89, maxlon=-1.165, maxlat=52.92));
 
+shadows = cast_shadow(trees, tree_param_getter_nottingham, [1, 0.4, 0.5])
+
 TreeLoaders.project_local!(trees.pointgeom, metadata(trees, "center_lon"), metadata(trees, "center_lat"))
 
 trees
