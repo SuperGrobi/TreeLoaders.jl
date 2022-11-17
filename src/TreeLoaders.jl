@@ -13,5 +13,4 @@ include("nottingham.jl")
 
 export cast_shadow
 include("ShadowCasting.jl")
-
 end

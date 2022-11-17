@@ -1,5 +1,18 @@
+"""
+    load_nottingham_trees(path; bbox=nothing)
 
+loads tree data from nottingham. Downloaded from `https://maps164.nottinghamcity.gov.uk/server/rest/services/OpenData/OpenData/MapServer/91`.
 
+merges the considerable amount of duplicate trees in the original dataset by distance (trees closer than 1e-4m are considered equal)
+
+# arguments
+- path: Path to the file with the dataset
+- bbox: named tuple with (minlon, minlat, maxlon, maxlat), specifying a clipping range for the TreeLoaders
+
+# returns
+- DataFrame with multiple columns, most relevant `:id, :lon, :lat, :pointgeom` and multiple ones with a lot of information about the tree geometry 
+and metadata keys `"center_lon"` and `"center_lat"` describing the center of the bounding box of all trees contained.
+"""
 function load_nottingham_trees(path; bbox=nothing)
     df = CSV.read(path, DataFrame)
 
@@ -81,6 +94,18 @@ function load_nottingham_trees(path; bbox=nothing)
     return reduced_df
 end
 
+"""
+    tree_param_getter_nottingham(row)
+    
+calculates the basic properies needed in the shadow casting algorithm based on a row of the nottingham dataset (loaded with `load_nottingham_trees`)
+
+# returns
+tuple with:
+- x: first coordinate of the pointgeom
+- y: second coordinate of the pointgeom
+- r: radius of the tree crown
+- height of the center of the tree crown
+"""
 function tree_param_getter_nottingham(row)
     x = ArchGDAL.getx(row.pointgeom, 0)
     y = ArchGDAL.gety(row.pointgeom, 0)
