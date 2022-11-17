@@ -8,7 +8,7 @@ using ProgressMeter
 using Statistics
 
 export load_nottingham_trees, tree_param_getter_nottingham
-include("nottingham.jl")
+include("Nottingham.jl")
 
 
 export cast_shadow
