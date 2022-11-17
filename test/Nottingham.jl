@@ -1,7 +1,9 @@
 @testset "Nottingham Loaders" begin
     # dataset with originally 3063 trees, cropped to bbox -1.19 < lon < -1.18 && 52.9 < lat < 52.91
     trees = load_nottingham_trees("./data/nottingham_treesample.csv")
+    @test true  # running the function is some kind of test.
     trees_croped = load_nottingham_trees("./data/nottingham_treesample.csv"; bbox=(minlon=-1.19, minlat=52.9, maxlon=-1.18, maxlat=52.91))
+    @test true
 
     @test nrow(trees) <= 3063
     @test nrow(trees_croped) <= 3063

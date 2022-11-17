@@ -5,3 +5,4 @@ using ArchGDAL
 using Test
 
 include("Nottingham.jl")
+include("ShadowCasting.jl")
