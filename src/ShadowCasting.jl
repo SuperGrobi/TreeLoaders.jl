@@ -10,7 +10,7 @@ of the octagon are informed by the return values of `param_getter`, as well as t
     - pointgeom: `ArchGDAL` point in wsg84 crs (use `apply_wsg_84!` from `CoolWalksUtils.jl`)
     - id: unique id for each tree
 - param_getter: Function taking a `row` of the DataFrame and returning a Tuple with:
-(x_location, y_location, radius_of_crown, height_of_crown_center)
+(x_location, y_location, height_of_crown_center, radius_of_crown)
 """
 function cast_shadow(tree_df, param_getter::Function, sun_direction::AbstractArray)
     @assert sun_direction[3] > 0 "the sun is below or on the horizon. Everything is in shadow."

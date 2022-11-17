@@ -103,8 +103,8 @@ calculates the basic properies needed in the shadow casting algorithm based on a
 tuple with:
 - x: first coordinate of the pointgeom
 - y: second coordinate of the pointgeom
-- r: radius of the tree crown
 - height of the center of the tree crown
+- r: radius of the tree crown
 """
 function tree_param_getter_nottingham(row)
     x = ArchGDAL.getx(row.pointgeom, 0)

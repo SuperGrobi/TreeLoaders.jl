@@ -1,6 +1,7 @@
 using TreeLoaders
+using CoolWalksUtils
+using DataFrames
+using ArchGDAL
 using Test
 
-@testset "TreeLoaders.jl" begin
-    # Write your tests here.
-end
+include("Nottingham.jl")
