@@ -54,9 +54,9 @@ jobs:
         with:
             ssh-private-key: ${{ secrets.TREELOADERS_PRIVATE_KEY }}
       - name: Clone CoolWalksUtils.jl
-        run: git clone https://github.com/SuperGrobi/CoolWalksUtils.jl TreeLoaders.jl/
+        run: git clone https://github.com/SuperGrobi/CoolWalksUtils.jl
       - name: Install CoolWalksUtils repo
-        run: julia --project=docs -e 'using Pkg; Pkg.add(path="./TreeLoaders.jl/CoolWalksUtils.jl")'
+        run: julia --project=docs -e 'using Pkg; Pkg.add(path="./CoolWalksUtils.jl")'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-docdeploy@v1
         env:
