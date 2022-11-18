@@ -35,7 +35,7 @@ jobs:
             ssh-private-key: ${{ secrets.TREELOADERS_PRIVATE_KEY }}
       - name: Clone CoolWalksUtils.jl
         run: git clone https://github.com/SuperGrobi/CoolWalksUtils.jl
-      - name: Install private repo
+      - name: Install CoolWalksUtils repo
         run: julia --project -e 'using Pkg; Pkg.add(path="./CoolWalksUtils.jl")'
       - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
@@ -50,6 +50,13 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.TREELOADERS_PRIVATE_KEY }}
+      - name: Clone CoolWalksUtils.jl
+        run: git clone https://github.com/SuperGrobi/CoolWalksUtils.jl
+      - name: Install CoolWalksUtils repo
+        run: julia --project -e 'using Pkg; Pkg.add(path="./CoolWalksUtils.jl")'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-docdeploy@v1
         env:
