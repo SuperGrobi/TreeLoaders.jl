@@ -1,17 +1,17 @@
 """
     load_nottingham_trees(path; bbox=nothing)
 
-loads tree data from nottingham. Downloaded from `https://maps164.nottinghamcity.gov.uk/server/rest/services/OpenData/OpenData/MapServer/91`.
+Loads tree data from nottingham. Downloaded from `https://maps164.nottinghamcity.gov.uk/server/rest/services/OpenData/OpenData/MapServer/91`.
 
 merges the considerable amount of duplicate trees in the original dataset by distance (trees closer than 1e-4m are considered equal)
 
 # arguments
-- path: Path to the file with the dataset
-- bbox: named tuple with (minlon, minlat, maxlon, maxlat), specifying a clipping range for the TreeLoaders
+- `path`: Path to the file with the dataset
+- `bbox`: named tuple with (minlon, minlat, maxlon, maxlat), specifying a clipping range for the TreeLoaders
 
 # returns
-- DataFrame with multiple columns, most relevant `:id, :lon, :lat, :pointgeom` and multiple ones with a lot of information about the tree geometry 
-and metadata keys `"center_lon"` and `"center_lat"` describing the center of the bounding box of all trees contained..
+DataFrame with multiple columns, most relevant `:id, :lon, :lat, :pointgeom` and multiple other ones with a lot of information about the tree geometry 
+and metadata keys `"center_lon"` and `"center_lat"` describing the center of the bounding box of all trees contained.
 """
 function load_nottingham_trees(path; bbox=nothing)
     df = CSV.read(path, DataFrame)
@@ -97,7 +97,7 @@ end
 """
     tree_param_getter_nottingham(row)
     
-calculates the basic properies needed in the shadow casting algorithm based on a row of the nottingham dataset (loaded with `load_nottingham_trees`)
+calculates the basic properies needed in the shadow casting algorithm based on a row of the nottingham dataset (loaded with `load_nottingham_trees`).
 
 # returns
 tuple with:
