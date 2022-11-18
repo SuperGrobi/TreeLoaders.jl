@@ -32,7 +32,7 @@ jobs:
           arch: ${{ matrix.arch }}
       - uses: webfactory/ssh-agent@v0.5.4
         with:
-            ssh-private-key: ${{ secrets.SSH_SECRET }}
+            ssh-private-key: ${{ secrets.TREELOADERS_PRIVATE_KEY }}
       - name: Clone CoolWalksUtils.jl
         run: git clone https://github.com/SuperGrobi/CoolWalksUtils.jl
       - name: Install private repo
