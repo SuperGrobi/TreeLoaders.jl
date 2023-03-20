@@ -38,7 +38,7 @@ function cast_shadow(tree_df, param_getter::Function, sun_direction::AbstractArr
         metadata!(shadow_df, key, metadata(tree_df, key); style=:note)
     end
 
-    @showprogress 1 for row in eachrow(tree_df)
+    @showprogress 1 "calculating shadows" for row in eachrow(tree_df)
         # discover tree parameters
         x, y, h, r = param_getter(row)
 
