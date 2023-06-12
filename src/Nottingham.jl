@@ -26,19 +26,9 @@ function load_nottingham_trees(path; bbox=nothing)
     filter!([:CROWN_SPREAD_RADIUS, :HEIGHT_N] => (csr, h) -> !ismissing(csr) && !ismissing(h), df)
 
     relevant_names = [:id, :TREETYPE, :SPECIES, :COMMONNAME, :HEIGHT, :SPREAD, :CROWN_SPREAD, :CROWN_SPREAD_RADIUS, :HEIGHT_N, :lon, :lat]
+    select!(df, relevant_names)
 
-    # trim dataframe to needed size and set metadata
-    if bbox === nothing
-        bbox = BoundingBox(df.lon, df.lat)
-        metadata!(df, "center_lon", (bbox.minlon + bbox.maxlon) / 2; style=:note)
-        metadata!(df, "center_lat", (bbox.minlat + bbox.maxlat) / 2; style=:note)
-        df = df[:, relevant_names]
-    else
-        bbox = BoundingBox(bbox)  # sort arguments
-        metadata!(df, "center_lon", (bbox.minlon + bbox.maxlon) / 2; style=:note)
-        metadata!(df, "center_lat", (bbox.minlat + bbox.maxlat) / 2; style=:note)
-        df = filter([:lon, :lat] => (lon, lat) -> in_BoundingBox(lon, lat, bbox), df[:, relevant_names])
-    end
+    apply_bbox!(df, bbox)
 
     # add ArchGDAL points
     df.pointgeom = ArchGDAL.createpoint.(df.lon, df.lat)
