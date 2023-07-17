@@ -5,3 +5,10 @@
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
 Here we load and project a various kinds of trees.
+
+# Supported things:
+you can load:
+- nottingham open data trees
+- valencia trees
+- barcelona trees
+- new york city open data trees
