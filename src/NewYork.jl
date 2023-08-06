@@ -3,6 +3,8 @@
 
 Loads tree data from New York. Downloaded from `https://data.cityofnewyork.us/Environment/2015-Street-Tree-Census-Tree-Data/uvpi-gqnh`.
 
+Sets `height=6.0m` and `radius=3.5m`, as these values are not given in the dataset.
+
 # arguments
 - `path`: Path to the file with the dataset
 - `extent`: `Extents.Extent`, specifying a clipping range for the Dataset. Use `X` for `lon` and `Y` for `lat`.
