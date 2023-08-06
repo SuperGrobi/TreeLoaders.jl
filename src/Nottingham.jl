@@ -3,7 +3,7 @@
 
 Loads tree data from nottingham. Downloaded from `https://maps164.nottinghamcity.gov.uk/server/rest/services/OpenData/OpenData/MapServer/91`.
 
-merges the considerable amount of duplicate trees in the original dataset by distance (trees closer than 1e-4m are considered equal)
+merges the considerable amount of duplicate trees in the original dataset by distance (trees closer than 1e-5m are considered equal)
 
 # arguments
 - `path`: Path to the file with the dataset
