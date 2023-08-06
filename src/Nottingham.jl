@@ -77,5 +77,6 @@ function load_nottingham_trees(path; extent=nothing)
 
     # project back
     project_back!(reduced_df)
+    check_tree_dataframe_integrity(reduced_df)
     return reduced_df
 end
