@@ -18,7 +18,8 @@ makedocs(;
         "Home" => "index.md",
         "Shadow Casting" => "ShadowCasting.md",
         "Nottingham" => "Nottingham.md",
-        "New York" => "NewYork.md"
+        "New York" => "NewYork.md",
+        "Spain" => "Spain.md"
     ]
 )
 
