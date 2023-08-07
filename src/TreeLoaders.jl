@@ -5,12 +5,18 @@ using GeoDataFrames
 using ArchGDAL
 using CSV
 using SpatialIndexing
+
 using ProgressMeter
+using ProgressBars
+
 using Statistics
 using TimeZones
 using Extents
 using Graphs
 using SparseArrays
+using Dates
+using LinearAlgebra
+using GeoInterface
 
 """
     apply_extent!(df, extent)
