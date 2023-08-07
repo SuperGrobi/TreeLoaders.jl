@@ -19,31 +19,6 @@ using LinearAlgebra
 using GeoInterface
 
 """
-    apply_extent!(df, extent)
-
-trim `df` to only contain trees which are in `extent`. (uses the `:lon` and `:lat` columns).
-"""
-function apply_extent!(df, extent)
-    # trim dataframe to given size
-    if extent !== nothing
-        filter!([:lon, :lat] => (lon, lat) -> extent_contains(extent, lon, lat), df)
-    end
-end
-
-"""
-    set_observatory!(df, name, timezone)
-
-creates a `CoolWalksUtils.ShadowObservatory` and adds it to the metadata of `df`.
-`lon` and `lat` are taken to be the center of the `Extent` of the dataset.
-"""
-function set_observatory!(df, name, timezone)
-    center = extent_center(geoiter_extent(df.lon, df.lat))
-    obs = ShadowObservatory(name, center.X, center.Y, timezone)
-    metadata!(df, "observatory", obs; style=:note)
-    return df
-end
-
-"""
     check_tree_dataframe_integrity(df)
 
 Checks if `df` conforms to the technical requirements needed to be considered as a source for tree data.
