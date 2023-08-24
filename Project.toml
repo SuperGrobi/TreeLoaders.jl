@@ -29,6 +29,7 @@ DataFrames = "1.4"
 Extents = "0.1"
 ProgressMeter = "1"
 SpatialIndexing = "0.1"
+TestItems = "0.1"
 julia = "1.9"
 
 [extras]
