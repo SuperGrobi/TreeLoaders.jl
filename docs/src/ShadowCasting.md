@@ -1,8 +1,10 @@
 # Shadow Casting
 ## Introduction
-For trees, we assume a their crown to be circular (approxiated by an octagon), whose normal is pointed towards the sun,
-with the center at the height of the tree minus the radius of the crown above the ground. This object is projected onto
-the plane.
+For trees, we assume their crown to be circular/spherical (approxiated by an octagon) with radius `:radius`,
+whose normal is pointed towards the sun, centered at `:height` above the ground. This object is projected onto
+the plane to give the final shadow.
+
+![Schematic of shadowcasting for trees](./assets/tree_shadows.png)
 
 ## API
 

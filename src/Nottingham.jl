@@ -1,97 +1,82 @@
 """
-    load_nottingham_trees(path; bbox=nothing)
+    load_nottingham_trees(path; extent=nothing)
 
 Loads tree data from nottingham. Downloaded from `https://maps164.nottinghamcity.gov.uk/server/rest/services/OpenData/OpenData/MapServer/91`.
 
-merges the considerable amount of duplicate trees in the original dataset by distance (trees closer than 1e-4m are considered equal)
+merges the considerable amount of duplicate trees in the original dataset by distance (trees closer than 1e-5m are considered equal)
 
 # arguments
 - `path`: Path to the file with the dataset
-- `bbox`: named tuple with (minlon, minlat, maxlon, maxlat), specifying a clipping range for the TreeLoaders
+- `extent`: `Extents.Extent`, specifying a clipping range for the Dataset. Use `X` for `lon` and `Y` for `lat`.
 
 # returns
-DataFrame with multiple columns, most relevant `:id, :lon, :lat, :pointgeom` and multiple other ones with a lot of information about the tree geometry 
-and metadata keys `"center_lon"` and `"center_lat"` describing the center of the bounding box of all trees contained.
+DataFrame conforming to the requirements needed to be considered a source of tree data.
 """
-function load_nottingham_trees(path; bbox=nothing)
+function load_nottingham_trees(path; extent=nothing)
     df = CSV.read(path, DataFrame)
 
     name_map = Dict(
         :OBJECTID => :id,
         :LONG => :lon,
-        :LAT => :lat
+        :LAT => :lat,
+        :HEIGHT_N => :height,
+        :CROWN_SPREAD_RADIUS => :radius
     )
     rename!(df, name_map)
     filter!(:FELLED => ==("No"), df)
-    filter!([:CROWN_SPREAD_RADIUS, :HEIGHT_N] => (csr, h) -> !ismissing(csr) && !ismissing(h), df)
+    dropmissing!(df, [:radius, :height])
 
-    relevant_names = [:id, :TREETYPE, :SPECIES, :COMMONNAME, :HEIGHT, :SPREAD, :CROWN_SPREAD, :CROWN_SPREAD_RADIUS, :HEIGHT_N, :lon, :lat]
+    relevant_names = [:id, :lon, :lat, :height, :radius, :TREETYPE, :SPECIES, :COMMONNAME]
     select!(df, relevant_names)
 
-    apply_bbox!(df, bbox)
+    apply_extent!(df, extent)
+    set_observatory!(df, "NottinghamTreesObservatory", tz"Europe/London")
 
     # add ArchGDAL points
-    df.pointgeom = ArchGDAL.createpoint.(df.lon, df.lat)
-    apply_wsg_84!.(df.pointgeom)
+    df.geometry = ArchGDAL.createpoint.(df.lon, df.lat)
+    apply_wsg_84!.(df.geometry)
 
     # project points to local
-    project_local!(df.pointgeom, metadata(df, "center_lon"), metadata(df, "center_lat"))
+    project_local!(df)
 
     # build r-tree with points
-    rt = build_point_rtree(df.pointgeom, df.id)
+    rt = build_rtree(df)
+    adj = spzeros(Bool, (nrow(df), nrow(df)))
 
-    # find all the points very close to one another, throw all but one of them out...
-    seen_ids = Int64[]
-    reduced_df = empty(df)
-    for row in eachrow(df)#[1:5]
-        BUFFER = 1e-5
-        intersection = intersects_with(rt, rect_from_geom(row.pointgeom, buffer=BUFFER))
-
-        # use only ids which have not yet been looked at
-        ids = [i.val for i in intersection if !(i.val in seen_ids)]
-        length(ids) == 0 && continue
-        # add all ids to seen_ids
-        for id in ids
-            push!(seen_ids, id)
-        end
-
-        if length(ids) > 1
-            subframe = df[findall(in(ids), df.id), :]
-            if allequal(subframe.lon) && allequal(subframe.lat)
-                row_to_add = subframe[1, :]
-                row_to_add.CROWN_SPREAD = mean(subframe.CROWN_SPREAD)
-                row_to_add.CROWN_SPREAD_RADIUS = mean(subframe.CROWN_SPREAD_RADIUS)
-                row_to_add.HEIGHT_N = mean(subframe.HEIGHT_N)
-                push!(reduced_df, row_to_add)
-            else
-                @warn "the locations in the subframe are not the same"
-            end
-        elseif length(ids) == 1
-            push!(reduced_df, row)
+    BUFFER = 1e-5
+    # build adjacency matrix
+    for row in eachrow(df)
+        intersections = intersects_with(rt, rect_from_geom(row.geometry, buffer=BUFFER))
+        for intersection in intersections
+            adj[rownumber(row), intersection.id] = true
         end
     end
 
+    # build graph and find connected components
+    comps = connected_components(SimpleGraph(adj))
+    groups = zeros(Int, nrow(df))
+    for (i, com) in enumerate(comps)
+        groups[com] .= i
+    end
+    df.components = groups
+
+    # combine clusters together
+    gdf = groupby(df, :components)
+    mean_cols = [:height, :radius]
+    first_cols = Not([mean_cols; :geometry; :components])
+    reduced_df = combine(
+        gdf,
+        first_cols .=> first .=> first_cols,
+        mean_cols .=> mean .=> mean_cols,
+        :geometry => (g -> ArchGDAL.clone(first(g))) => :geometry
+    )
+
+    #postprocess
+    select!(reduced_df, Not(:components))
+    transform!(reduced_df, [:height, :radius] => ByRow(-) => :height)
+
     # project back
-    project_back!(reduced_df.pointgeom)
+    project_back!(reduced_df)
+    check_tree_dataframe_integrity(reduced_df)
     return reduced_df
-end
-
-"""
-    tree_param_getter_nottingham(row)
-    
-calculates the basic properies needed in the shadow casting algorithm based on a row of the nottingham dataset (loaded with `load_nottingham_trees`).
-
-# returns
-tuple with:
-- x: first coordinate of the pointgeom
-- y: second coordinate of the pointgeom
-- height of the center of the tree crown
-- r: radius of the tree crown
-"""
-function tree_param_getter_nottingham(row)
-    x = ArchGDAL.getx(row.pointgeom, 0)
-    y = ArchGDAL.gety(row.pointgeom, 0)
-    r = row.CROWN_SPREAD_RADIUS
-    height = row.HEIGHT_N - r
-    return (x, y, height, r)
 end

@@ -12,16 +12,18 @@ makedocs(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://SuperGrobi.github.io/TreeLoaders.jl",
         edit_link="main",
-        assets=String[],
+        assets=String[]
     ),
     pages=[
         "Home" => "index.md",
         "Shadow Casting" => "ShadowCasting.md",
-        "Nottingham" => "Nottingham.md"
-    ],
+        "Nottingham" => "Nottingham.md",
+        "New York" => "NewYork.md",
+        "Spain" => "Spain.md"
+    ]
 )
 
 deploydocs(;
     repo="github.com/SuperGrobi/TreeLoaders.jl",
-    devbranch="main",
+    devbranch="main"
 )

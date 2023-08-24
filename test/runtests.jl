@@ -1,8 +1,3 @@
-using TreeLoaders
-using CoolWalksUtils
-using DataFrames
-using ArchGDAL
-using Test
+using TestItemRunner
 
-include("Nottingham.jl")
-include("ShadowCasting.jl")
+@run_package_tests verbose = true

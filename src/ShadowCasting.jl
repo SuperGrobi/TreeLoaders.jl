@@ -1,24 +1,32 @@
 """
-    cast_shadow(tree_df, param_getter::Function, sun_direction::AbstractArray)
+    cast_shadows(tree_df, time::DateTime)
+    cast_shadows(tree_df, sun_direction::AbstractVector)
     
 creates new `DataFrame` with the shadows of the trees in `tree_df`. Shadows are approximated by
 an octagon with normal direction along the `sun_direction`. The location and height of the center
-of the octagon are informed by the return values of `param_getter`, as well as the radius.
+of the octagon are informed by the values in the `:height` and `:radius` columns.
 
 # arguments
-- `tree_df`: DataFrame with metadata of `center_lat` and `center_lon` and at least these columns:
-    - `pointgeom`: `ArchGDAL` point in wsg84 crs (use `apply_wsg_84!` from `CoolWalksUtils.jl`)
-    - `id`: unique id for each tree
-- `param_getter`: Function taking a `row` of the DataFrame and returning a Tuple with:
-`(x_location, y_location, height_of_crown_center, radius_of_crown)`
+- `tree_df`: DataFrame with metadata of `observatory`. Is assumend to fulfill the requirements for a tree source.
+- `time`: Local `DateTime` for which the shadows shall be calculated. Or:
+- `sun_direction`: unit vector pointing towards the sun in local coordinates (x east, y north, z up)
+
+# returns
+`DataFrame` with columns
+- `id`: id of tree
+- `geometry`: `ArchGDAL` polygon representing shadow if tree with `id` in global coordinates
+
+and the same metadata as `tree_df`.
 """
-function cast_shadow(tree_df, param_getter::Function, sun_direction::AbstractArray)
+cast_shadows(tree_df, time::DateTime) = cast_shadows(tree_df, local_sunpos(time, metadata(tree_df, "observatory")))
+
+function cast_shadows(tree_df, sun_direction::AbstractVector)
     @assert sun_direction[3] > 0 "the sun is below or on the horizon. Everything is in shadow."
-    project_local!(tree_df.pointgeom, metadata(tree_df, "center_lon"), metadata(tree_df, "center_lat"))
+    project_local!(tree_df)
 
     # construct right hand system with sun direction:
-    v1 = unit(cross(sun_direction, [1, 0, 0]))
-    v2 = unit(cross(v1, sun_direction))
+    v1 = normalize(cross(sun_direction, [1, 0, 0]))
+    v2 = normalize(cross(v1, sun_direction))
 
     # create projection of silhouette centered on (0,0) at height 0
     n = 8
@@ -33,25 +41,33 @@ function cast_shadow(tree_df, param_getter::Function, sun_direction::AbstractArr
     # find offset vector
     offset_vector = -sun_direction[1:2] ./ sun_direction[3]
 
-    shadow_df = DataFrame(geometry=ArchGDAL.IGeometry{ArchGDAL.wkbPolygon}[], id=typeof(tree_df.id)())
-    for key in metadatakeys(tree_df)
-        metadata!(shadow_df, key, metadata(tree_df, key); style=:note)
-    end
+    shadows_array = Vector{ArchGDAL.IGeometry{ArchGDAL.wkbPolygon}}(undef, nrow(tree_df))
 
-    @showprogress 1 "calculating shadows" for row in eachrow(tree_df)
+    pbar = ProgressBar(eachrow(tree_df), printing_delay=1.0)
+    set_description(pbar, "calucating tree shadows")
+
+    Threads.@threads for row in pbar
         # discover tree parameters
-        x, y, h, r = param_getter(row)
+        x, y = GeoInterface.coordinates(row.geometry)
+        h, r = row.height, row.radius
 
         # create shadow
         shadow_outline = [(x + h * offset_vector[1] + r * p[1], y + h * offset_vector[2] + r * p[2]) for p in projected_points]
         # fix numerical problems when start and end ar not exactly the same
         shadow_outline[end] = shadow_outline[1]
         shadow = ArchGDAL.createpolygon(shadow_outline)
-        reinterp_crs!(shadow, ArchGDAL.getspatialref(row.pointgeom))
-        push!(shadow_df, [shadow, row.id])
+        shadows_array[rownumber(row)] = shadow
     end
 
-    project_back!(tree_df.pointgeom)
-    project_back!(shadow_df.geometry)
+    # do this on the whole array to avoid creating multiple transformations
+    reinterp_crs!(shadows_array, ArchGDAL.getspatialref(tree_df.geometry[1]))
+
+    shadow_df = DataFrame(id=tree_df.id, geometry=shadows_array)
+    for key in metadatakeys(tree_df)
+        metadata!(shadow_df, key, metadata(tree_df, key); style=:note)
+    end
+
+    project_back!(tree_df)
+    project_back!(shadow_df)
     return shadow_df
 end
