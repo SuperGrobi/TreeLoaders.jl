@@ -36,14 +36,6 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      # - uses: webfactory/ssh-agent@v0.5.4
-      #   with:
-      #       ssh-private-key: ${{ secrets.COOLWALKSUTILS_PRIVATE_KEY }}
-      # - name: Clone CoolWalksUtils.jl
-      #   run: git clone https://github.com/SuperGrobi/CoolWalksUtils.jl ../CoolWalksUtils.jl
-      # - name: Install CoolWalksUtils repo
-      #   shell: julia --color=yes --project=. {0}
-      #   run: using Pkg; Pkg.add(path="../CoolWalksUtils.jl")
       - uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.COOLWALKSREGISTRY_PRIVATE_KEY }}
@@ -65,11 +57,10 @@ jobs:
           version: '1'
       - uses: webfactory/ssh-agent@v0.5.4
         with:
-            ssh-private-key: ${{ secrets.COOLWALKSUTILS_PRIVATE_KEY }}
-      - name: Clone CoolWalksUtils.jl
-        run: git clone https://github.com/SuperGrobi/CoolWalksUtils.jl
-      - name: Install CoolWalksUtils repo
-        run: julia --project=docs -e 'using Pkg; Pkg.add(path="./CoolWalksUtils.jl")'
+            ssh-private-key: ${{ secrets.COOLWALKSREGISTRY_PRIVATE_KEY }}
+      - name: Add CoolWalks Registry
+        shell: julia --color=yes --project=. {0}
+        run: using Pkg; Pkg.Registry.add(RegistrySpec(url="https://github.com/SuperGrobi/CoolWalksRegistry"))
       - uses: julia-actions/julia-buildpkg@v1
         with:
             project: 'docs'
